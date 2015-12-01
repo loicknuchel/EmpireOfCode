@@ -4,9 +4,11 @@ var Client = require("battle/commander.js").Client;
 var client = new Client();
 
 var geo = new Geo();
+var game = new Game(client);
 
 var Command = {
   MOVE: 'MOVE',
+  GROUP: 'GROUP',
   ATTACK: 'ATTACK'
 };
 var Target = {
@@ -14,13 +16,14 @@ var Target = {
   CENTER: 'CENTER'
 };
 var actions = [
-  {command: Command.MOVE, coords: [40, 0]},
-  {command: Command.MOVE, coords: [20, 0]},
+  {command: Command.GROUP, coords: [40, 40]},
+  {command: Command.MOVE, coords: [20, 40]},
   {command: Command.ATTACK, target: Target.CENTER}
 ];
 execAll(actions);
 
 function execAll(actions){
+  console.log('manual', actions);
   if(actions.length > 0){
     var head = actions[0];
     var tail = actions.slice(1);
@@ -35,6 +38,9 @@ function execAll(actions){
 function exec(action){
   if(action.command === Command.MOVE){
     client.doMove(action.coords);
+    return client.whenIdle();
+  } else if(action.command === Command.GROUP){
+    return game.groupUnits(action.coords);
   } else if(action.command === Command.ATTACK){
     var target = client.askCenter();
     if(action.target === Target.TOWER){
@@ -45,10 +51,11 @@ function exec(action){
       }
     }
     client.doAttack(target.id);
+    return client.whenIdle();
   } else {
     console.log('ERROR: unknown command', action);
+    return client.whenIdle();
   }
-  return client.whenIdle();
 }
 
 function getNearest(coords, items){
@@ -64,7 +71,7 @@ function getNearest(coords, items){
   return nearest;
 }
 
-
+/* Utils */
 
 function Geo(){
   this.distance = distance;
@@ -85,6 +92,34 @@ function Geo(){
           iteratee([i, j]);
         }
       }
+    }
+  }
+}
+
+function Game(client){
+  this.groupUnits = groupUnits;
+  var geo = new Geo();
+
+  function groupUnits(coord){
+    client.doMove(coord);
+    return client.whenIdle().then(function(){
+      return waitIn(coord, 1);
+    });
+    function waitIn(coord, radius){
+      return client.whenItemInArea(coord, radius).then(function(){
+        if(!isAllUnitsIn(coord, radius)){
+          return waitIn(coord, radius);
+        }
+      });
+    }
+    function isAllUnitsIn(coord, radius){
+      var units = client.askUnits();
+      for(var i in units){
+        if(!geo.isInCircle(coord, radius, units[i].coordinates)){
+          return false;
+        }
+      }
+      return true;
     }
   }
 }
