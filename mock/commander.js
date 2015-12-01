@@ -1,10 +1,11 @@
 function Commander(){
   return {
     Client: function(){
+      var map = Maps.oneTower;
       return {
         // Infos
         askMyInfo: function(){
-          return {};
+          return map.me;
         },
         askItemInfo: function(itemId){
           return {};
@@ -19,10 +20,10 @@ function Commander(){
           return {};
         },
         askTowers: function(){
-          return {};
+          return map.towers;
         },
         askCenter: function(){
-          return {};
+          return map.center;
         },
         askUnits: function(){
           return {};
