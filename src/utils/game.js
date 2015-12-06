@@ -1,5 +1,7 @@
 function Game(client){
   this.groupUnits = groupUnits;
+  this.getTowers = getTowers;
+  this.hasRocketGun = hasRocketGun;
   var geo = new Geo();
 
   function groupUnits(coord){
@@ -23,5 +25,16 @@ function Game(client){
       }
       return true;
     }
+  }
+  function getTowers(){
+    return _.map(_.filter(client.askTowers(), {is_dead: false}), function(tower){
+      if(TowerUtils.isSentryGun(tower)){ tower.type = 'sentry'; }
+      if(TowerUtils.isMachineGun(tower)){ tower.type = 'machine'; }
+      if(TowerUtils.isRocketGun(tower)){ tower.type = 'rocket'; }
+      return tower;
+    });
+  }
+  function hasRocketGun(towers){
+    return _.filter(towers, {type: 'rocket'}).length > 0;
   }
 }

@@ -1,7 +1,7 @@
 function Commander(){
   return {
     Client: function(){
-      var map = Maps.oneTower;
+      var map = Maps.myBase;
       return {
         // Infos
         askMyInfo: function(){
