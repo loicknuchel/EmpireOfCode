@@ -2,6 +2,7 @@ function Geo(){
   this.distance = distance;
   this.isInCircle = isInCircle;
   this.forEachInCircle = forEachInCircle;
+  this.getNearest = getNearest;
 
   function distance(coord1, coord2){
     var x = coord1[0]-coord2[0], y = coord1[1]-coord2[1];
@@ -18,5 +19,17 @@ function Geo(){
         }
       }
     }
+  }
+  function getNearest(coords, items){
+    var nearest = null;
+    var nearestDistance = null;
+    for(var i=0; i<items.length; i++){
+      var itemDistance = distance(coords, items[i].coordinates);
+      if(nearestDistance === null || itemDistance < nearestDistance){
+        nearest = items[i];
+        nearestDistance = itemDistance;
+      }
+    }
+    return nearest;
   }
 }

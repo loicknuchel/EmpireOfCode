@@ -2,7 +2,7 @@ function Game(client){
   this.groupUnits = groupUnits;
   this.getTowers = getTowers;
   this.hasRocketGun = hasRocketGun;
-  var geo = new Geo();
+  var GameUtils = new Geo();
 
   function groupUnits(coord){
     client.doMove(coord);
@@ -19,7 +19,7 @@ function Game(client){
     function isAllUnitsIn(coord, radius){
       var units = client.askUnits();
       for(var i in units){
-        if(!geo.isInCircle(coord, radius, units[i].coordinates)){
+        if(!GameUtils.isInCircle(coord, radius, units[i].coordinates)){
           return false;
         }
       }
@@ -31,10 +31,14 @@ function Game(client){
       if(TowerUtils.isSentryGun(tower)){ tower.type = 'sentry'; }
       if(TowerUtils.isMachineGun(tower)){ tower.type = 'machine'; }
       if(TowerUtils.isRocketGun(tower)){ tower.type = 'rocket'; }
+      tower.dps = dps(tower);
       return tower;
     });
   }
   function hasRocketGun(towers){
     return _.filter(towers, {type: 'rocket'}).length > 0;
+  }
+  function dps(item){
+    return item.damage_per_shot / item.rate_of_fire;
   }
 }
